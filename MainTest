@@ -1,0 +1,47 @@
+import org.testng.annotations.AfterMethod;
+import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.Test;
+
+public class UpdateAppTest {
+    private AppiumDriver driver;
+
+    @BeforeMethod
+    public void setUp() {
+        // Initialize the Appium driver
+        driver = new AndroidDriver(...); // your driver setup here
+    }
+
+    @Test
+    public void installUpdatedAppOverPlaystoreApp() throws InterruptedException {
+        // Uninstall Previous app
+        GenericFunctions.uninstallApp(configProperties.driverAppBundleID);
+
+        // Install Desired App from playstore
+        GenericFunctions.installAppFromAndroidPlayStore("Required APP to installed");
+        GenericFunctions.activateAppAndroid(configProperties.AppBundleID);
+
+        // Perform Login (If required)
+        DriverLoginPage driverLoginPage = new DriverLoginPage(driver);
+        driverLoginPage.logIntoDriverApp(TestData.getTestData("validLoginPhoneNumber"), TestData.getTestData("validLoginOtp"), envGlobals.countryName, envGlobals.countryCode);
+
+        // Perform actions as per your requirements (In this case, saving playstore app version)
+        GenericFunctions.tap(LoginPage.sideBar);
+        GenericFunctions.tap(SidePanelPage.settings);
+        DriverSettingsPage driverSettingsPage = new DriverSettingsPage(driver);
+        driverSettingsPage.saveOldAppVersion();
+
+        // Install Updated application
+        GenericFunctions.installApp(configProperties.newAppPath);
+        GenericFunctions.activateAppAndroid(configProperties.AppBundleID);
+        GenericFunctions.tap(DriverSidePanelPage.settings);
+        driverSettingsPage.saveNewAppVersion();
+        driverSettingsPage.verifyNewAppVersionIsGreaterThanOldAppVersion();
+    }
+
+    @AfterMethod
+    public void tearDown() {
+        if (driver != null) {
+            driver.quit();
+        }
+    }
+}
