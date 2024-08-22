@@ -1,0 +1,42 @@
+import io.appium.java_client.AppiumDriver;
+import io.appium.java_client.android.AndroidKey;
+import io.appium.java_client.android.nativekey.KeyEvent;
+import io.appium.java_client.pagefactory.AppiumFieldDecorator;
+import org.openqa.selenium.By;
+import org.openqa.selenium.WebElement;
+import org.openqa.selenium.support.PageFactory;
+import org.openqa.selenium.support.ui.WebDriverWait;
+
+public class PlayStorePage {
+    private AppiumDriver driver;
+    private WebDriverWait wait;
+
+    public PlayStorePage(AppiumDriver driver) {
+        this.driver = driver;
+        PageFactory.initElements(new AppiumFieldDecorator(driver), this);
+        this.wait = new WebDriverWait(driver, 30);
+    }
+
+    public void installAppFromPlayStore(String appName) throws InterruptedException {
+        driver.activateApp("com.android.vending");
+
+        // Wait for the Play Store to load
+        Thread.sleep(5000);
+
+        // Search for the app
+        WebElement searchBox = driver.findElement(By.xpath("//*[@text='Search']"));
+        searchBox.click();
+
+        WebElement searchTextBox = driver.findElement(By.xpath("//*[@text='Search Apps & Games']"));
+        searchTextBox.click();
+        WebElement searchTextBoxInputField = driver.findElement(By.className("android.widget.EditText"));
+        searchTextBoxInputField.click();
+        searchTextBoxInputField.sendKeys(appName);
+
+        driver.pressKey(new KeyEvent(AndroidKey.ENTER));
+        Thread.sleep(3000);
+
+        // Click on the Install/Update button
+        driver.findElement(By.xpath("//*[contains(@content-desc, '" + appName + "')]/following-sibling::android.view.View//android.widget.TextView")).click();
+    }
+}
